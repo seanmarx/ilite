@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+
+<question type="multichoice">
+  <name><text>Q: What is a token?</text></name>
+  <questiontext format="html"><text><![CDATA[<p>In the context of large language models, what is a token?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>A sub-word unit that text is split into before being processed by the model</text><feedback><text>Correct — tokenisation breaks text into smaller units (whole words, sub-words, or characters) that the model processes numerically.</text></feedback></answer>
+  <answer fraction="0"><text>A complete sentence used as input to the model</text><feedback><text>Incorrect — tokens are much smaller than sentences; a sentence typically contains many tokens.</text></feedback></answer>
+  <answer fraction="0"><text>A binary value representing whether a word is present or absent</text><feedback><text>Incorrect — tokens are mapped to dense embedding vectors, not binary presence/absence indicators.</text></feedback></answer>
+  <answer fraction="0"><text>A random number assigned to each word for encryption</text><feedback><text>Incorrect — tokenisation is a deterministic process for converting text into numerical units, not encryption.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: What does encoder-free mean for Gemma 4 12B?</text></name>
+  <questiontext format="html"><text><![CDATA[<p>When Gemma 4 12B is described as "encoder-free," what does this mean?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>It has no separate vision or audio encoder networks — raw inputs are projected directly into the LLM's embedding space</text><feedback><text>Correct — the dedicated vision encoder (550M params) and audio encoder (305M params) are replaced with lightweight linear projections.</text></feedback></answer>
+  <answer fraction="0"><text>It cannot process images or audio at all</text><feedback><text>Incorrect — Gemma 4 12B supports text, image, AND audio inputs despite having no dedicated encoders.</text></feedback></answer>
+  <answer fraction="0"><text>It uses an encoder-decoder architecture instead of a decoder-only one</text><feedback><text>Incorrect — Gemma 4 12B is decoder-only in its core architecture AND encoder-free in its multimodal processing.</text></feedback></answer>
+  <answer fraction="0"><text>It does not use the attention mechanism</text><feedback><text>Incorrect — the LLM's 48 decoder layers use attention extensively; it is the separate modality-specific encoders that are removed.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Vision embedder parameters</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Approximately how many parameters does Gemma 4 12B's vision embedder have, and what is the primary source of those parameters?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>35 million, mostly from the linear projection matrix that converts 6,912 pixel values to 3,840-dimensional embeddings</text><feedback><text>Correct — the projection matrix alone is 6,912 × 3,840 ≈ 26M parameters, accounting for most of the 35M total.</text></feedback></answer>
+  <answer fraction="0"><text>550 million, from 27 layers of transformer attention</text><feedback><text>Incorrect — 550M is the size of the traditional vision encoder used in Gemma 4 31B, not the lightweight embedder in 12B.</text></feedback></answer>
+  <answer fraction="0"><text>35 million, from multiple layers of convolutional neural networks</text><feedback><text>Incorrect — the embedder uses a single linear projection, not convolutional layers.</text></feedback></answer>
+  <answer fraction="0"><text>305 million, from conformer layers processing image patches</text><feedback><text>Incorrect — 305M is the audio encoder size in E2B/E4B models, not the vision embedder.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Audio processing in Gemma 4 12B</text></name>
+  <questiontext format="html"><text><![CDATA[<p>How does Gemma 4 12B process audio input?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>Raw 16 kHz audio is sliced into 40ms frames of 640 values each, then each frame is linearly projected to the LLM's embedding dimension</text><feedback><text>Correct — this is the entire audio pipeline: slice and project. No tokenisation, no conformer layers.</text></feedback></answer>
+  <answer fraction="0"><text>Audio is converted to a spectrogram image and processed by the vision embedder</text><feedback><text>Incorrect — audio is processed as raw amplitude samples, not converted to images.</text></feedback></answer>
+  <answer fraction="0"><text>Audio is transcribed to text first, then the text is processed normally</text><feedback><text>Incorrect — the model processes raw audio waveforms directly, not pre-transcribed text.</text></feedback></answer>
+  <answer fraction="0"><text>Audio is processed through 12 conformer layers before reaching the LLM</text><feedback><text>Incorrect — that is how E2B and E4B process audio. Gemma 4 12B skips all conformer layers entirely.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Positional encoding for vision</text></name>
+  <questiontext format="html"><text><![CDATA[<p>How does Gemma 4 12B encode the spatial position of image patches without a vision encoder?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>Two learned matrices (X and Y) provide coordinate-based positional embeddings that are summed and added to each patch embedding</text><feedback><text>Correct — the factorised X/Y lookup system provides spatial information without requiring attention-based 2D-RoPE.</text></feedback></answer>
+  <answer fraction="0"><text>Standard 1D positional encoding from the LLM is used since images are flattened into sequences</text><feedback><text>Incorrect — 1D encoding cannot represent 2D spatial relationships in images; the separate X/Y matrices are needed.</text></feedback></answer>
+  <answer fraction="0"><text>2D Rotary Position Encoding (2D-RoPE) is applied within the embedder's attention layers</text><feedback><text>Incorrect — the embedder has no attention layers, so 2D-RoPE cannot be used. This is why the X/Y matrix approach was developed.</text></feedback></answer>
+  <answer fraction="0"><text>No positional encoding is needed because the patch order is sufficient</text><feedback><text>Incorrect — without positional information, the model would not know where patches are located in the original image.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Hybrid attention design</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What two types of attention does Gemma 4 12B interleave in its 48 decoder layers?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>Local sliding window attention (1,024 tokens) and global full attention (up to 256K tokens)</text><feedback><text>Correct — local attention handles nearby context efficiently while global attention provides full-context awareness at key points.</text></feedback></answer>
+  <answer fraction="0"><text>Self-attention and cross-attention between encoder and decoder</text><feedback><text>Incorrect — there is no encoder to cross-attend to. Both attention types are self-attention variants within the decoder.</text></feedback></answer>
+  <answer fraction="0"><text>Causal attention and bidirectional attention</text><feedback><text>Incorrect — all attention in a decoder-only model is causal (masked). The distinction is between local and global scope.</text></feedback></answer>
+  <answer fraction="0"><text>Multi-head attention and single-head attention alternating between layers</text><feedback><text>Incorrect — both local and global attention use multi-head attention. The distinction is scope (window size), not head count.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Fine-tuning advantage</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Why is fine-tuning Gemma 4 12B simpler than fine-tuning traditional multimodal models?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>All modalities share the same weights, so a single fine-tuning pass updates text, image, and audio understanding together</text><feedback><text>Correct — without separate frozen encoders, LoRA or full fine-tuning naturally updates the entire multimodal pipeline in one pass.</text></feedback></answer>
+  <answer fraction="0"><text>The model has fewer parameters, so fine-tuning is faster</text><feedback><text>Incorrect — while fewer total parameters helps, the key advantage is architectural: no separate encoder to co-tune.</text></feedback></answer>
+  <answer fraction="0"><text>Fine-tuning is not needed because the model already works perfectly for all domains</text><feedback><text>Incorrect — domain-specific fine-tuning remains valuable for specialised applications like medical imaging or technical audio.</text></feedback></answer>
+  <answer fraction="0"><text>The model uses a special fine-tuning API that other models do not support</text><feedback><text>Incorrect — the advantage is architectural, not API-based. Standard tools like HuggingFace and Unsloth are used.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: VRAM requirement</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What is the approximate minimum VRAM needed to run Gemma 4 12B locally at full precision?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>16GB</text><feedback><text>Correct — Gemma 4 12B is specifically designed to fit on consumer GPUs with 16GB of VRAM.</text></feedback></answer>
+  <answer fraction="0"><text>4GB</text><feedback><text>Incorrect — 4GB is far too little for an 11.95B parameter model at full precision.</text></feedback></answer>
+  <answer fraction="0"><text>80GB</text><feedback><text>Incorrect — 80GB is what large models (70B+) require. Gemma 4 12B is designed for consumer hardware.</text></feedback></answer>
+  <answer fraction="0"><text>256GB</text><feedback><text>Incorrect — this far exceeds what Gemma 4 12B needs and is beyond consumer hardware.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Gemma 4 26B A4B architecture</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What makes the Gemma 4 26B A4B model run nearly as fast as a 4B model despite having 25.2B total parameters?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>It uses a Mixture-of-Experts architecture that activates only 3.8B parameters during inference</text><feedback><text>Correct — the "A4B" stands for "active 4B." Only 8 of 128 experts (plus 1 shared) are active per token.</text></feedback></answer>
+  <answer fraction="0"><text>It uses aggressive quantisation to reduce the effective model size</text><feedback><text>Incorrect — the speed comes from the MoE architecture's sparse activation, not quantisation.</text></feedback></answer>
+  <answer fraction="0"><text>It removes most of its layers during inference to speed up processing</text><feedback><text>Incorrect — all 30 layers are used; the sparsity is in which experts within each layer are activated.</text></feedback></answer>
+  <answer fraction="0"><text>It runs on specialised Google hardware that is not available to consumers</text><feedback><text>Incorrect — the model can run on standard consumer hardware thanks to its efficient MoE design.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Decoder-only vs encoder-free</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What is the relationship between "decoder-only" and "encoder-free" in the context of Gemma 4?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>"Decoder-only" refers to the core LLM architecture (no encoder-decoder split); "encoder-free" refers to the absence of separate modality-specific encoders for vision and audio</text><feedback><text>Correct — these are distinct concepts. All Gemma 4 models are decoder-only, but only the 12B is also encoder-free.</text></feedback></answer>
+  <answer fraction="0"><text>They mean exactly the same thing — both indicate the model has no encoder</text><feedback><text>Incorrect — "decoder-only" is about the core transformer design, while "encoder-free" is about how non-text modalities are handled.</text></feedback></answer>
+  <answer fraction="0"><text>"Encoder-free" means the model cannot understand any input, while "decoder-only" means it can only generate output</text><feedback><text>Incorrect — both encoder-free and decoder-only models can understand inputs; the terms describe architecture, not capability.</text></feedback></answer>
+  <answer fraction="0"><text>"Decoder-only" is the older term and "encoder-free" is the modern replacement</text><feedback><text>Incorrect — these describe different architectural properties that can coexist in the same model.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Attention mechanism purpose</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What is the primary purpose of the attention mechanism in a transformer?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>To compute relationships between tokens, allowing each token's representation to incorporate information from other relevant tokens</text><feedback><text>Correct — attention uses Query, Key, and Value vectors to determine which tokens are relevant to each other and blend their information.</text></feedback></answer>
+  <answer fraction="0"><text>To compress the input sequence into a single fixed-size vector</text><feedback><text>Incorrect — attention preserves the full sequence of tokens rather than compressing to a single vector.</text></feedback></answer>
+  <answer fraction="0"><text>To randomly select which tokens to process in order to reduce computation</text><feedback><text>Incorrect — attention is deterministic and considers all tokens (within its scope), not a random subset.</text></feedback></answer>
+  <answer fraction="0"><text>To convert text tokens into image patches for visual processing</text><feedback><text>Incorrect — attention processes relationships between tokens; it does not convert between modalities.</text></feedback></answer>
+</question>
+
+<question type="multichoice">
+  <name><text>Q: Multi-token prediction</text></name>
+  <questiontext format="html"><text><![CDATA[<p>What is the purpose of the multi-token prediction (MTP) companion model released alongside Gemma 4 12B?</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade><single>true</single><shuffleanswers>1</shuffleanswers>
+  <answer fraction="100"><text>To increase inference speed by predicting multiple tokens per forward pass instead of one at a time</text><feedback><text>Correct — MTP reduces generation latency by producing several tokens simultaneously, which is especially valuable for local deployment.</text></feedback></answer>
+  <answer fraction="0"><text>To train the model faster by processing multiple training examples simultaneously</text><feedback><text>Incorrect — MTP is an inference optimisation, not a training technique.</text></feedback></answer>
+  <answer fraction="0"><text>To translate between multiple languages at the same time</text><feedback><text>Incorrect — MTP relates to token generation speed, not multilingual capability.</text></feedback></answer>
+  <answer fraction="0"><text>To split the model across multiple GPUs for distributed inference</text><feedback><text>Incorrect — model parallelism is a separate technique. MTP is about predicting more than one token per step.</text></feedback></answer>
+</question>
+
+<!-- TRUE/FALSE -->
+
+<question type="truefalse">
+  <name><text>TF: Gemma 4 12B is the first medium-sized Gemma model with audio</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Gemma 4 12B is the first medium-sized model in the Gemma family capable of natively processing audio input.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="100"><text>true</text><feedback><text>Correct — previously, audio input was restricted to the smaller E2B and E4B edge models. Gemma 4 12B brings audio to the medium-size tier.</text></feedback></answer>
+  <answer fraction="0"><text>false</text><feedback><text>Incorrect — this statement is true. Before the 12B, only the E2B and E4B models supported audio.</text></feedback></answer>
+</question>
+
+<question type="truefalse">
+  <name><text>TF: The vision embedder uses attention</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Gemma 4 12B's vision embedder uses multiple layers of attention to process image patches, similar to a Vision Transformer.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="0"><text>true</text><feedback><text>Incorrect — the vision embedder has NO attention layers at all. It uses only a single linear projection plus positional embeddings. All attention-based processing happens in the LLM's decoder layers.</text></feedback></answer>
+  <answer fraction="100"><text>false</text><feedback><text>Correct — the embedder is entirely attention-free. Each patch is processed in isolation through a linear projection. The LLM handles all attention-based understanding.</text></feedback></answer>
+</question>
+
+<question type="truefalse">
+  <name><text>TF: Audio needs special positional encoding</text></name>
+  <questiontext format="html"><text><![CDATA[<p>In Gemma 4 12B, audio input requires special 2D positional embeddings similar to those used for image patches.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="0"><text>true</text><feedback><text>Incorrect — audio is inherently a 1D sequential signal, so the LLM's standard positional encoding for sequences applies naturally. Only images need the special X/Y positional embeddings.</text></feedback></answer>
+  <answer fraction="100"><text>false</text><feedback><text>Correct — audio frames are sequential, just like text tokens, so they use the LLM's standard positional encoding without any special 2D treatment.</text></feedback></answer>
+</question>
+
+<question type="truefalse">
+  <name><text>TF: Gemma 4 models are Apache 2.0 licensed</text></name>
+  <questiontext format="html"><text><![CDATA[<p>All Gemma 4 models are released under the Apache 2.0 open-source license, allowing unrestricted commercial use.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="100"><text>true</text><feedback><text>Correct — Google releases Gemma models under Apache 2.0, enabling both research and commercial deployment without restrictions.</text></feedback></answer>
+  <answer fraction="0"><text>false</text><feedback><text>Incorrect — Gemma 4 models are indeed Apache 2.0 licensed.</text></feedback></answer>
+</question>
+
+<question type="truefalse">
+  <name><text>TF: Context window size</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Gemma 4 12B supports a context window of up to 256K tokens.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="100"><text>true</text><feedback><text>Correct — the medium-sized models (12B, 26B A4B, 31B) support 256K tokens, while the smaller E2B and E4B support 128K tokens.</text></feedback></answer>
+  <answer fraction="0"><text>false</text><feedback><text>Incorrect — Gemma 4 12B does support up to 256K tokens of context.</text></feedback></answer>
+</question>
+
+<question type="truefalse">
+  <name><text>TF: Removing encoders sacrifices audio quality</text></name>
+  <questiontext format="html"><text><![CDATA[<p>Removing the dedicated audio encoder in Gemma 4 12B significantly worsens its audio recognition performance compared to the smaller E4B model.</p>]]></text></questiontext>
+  <defaultgrade>1</defaultgrade>
+  <answer fraction="0"><text>true</text><feedback><text>Incorrect — Gemma 4 12B actually outperforms E4B on audio benchmarks (e.g. FLEURS word error rate of 0.069 vs 0.08), showing the encoder-free approach does not sacrifice audio quality.</text></feedback></answer>
+  <answer fraction="100"><text>false</text><feedback><text>Correct — despite removing the 305M-parameter audio encoder, Gemma 4 12B achieves better audio recognition scores than the encoder-based E4B model.</text></feedback></answer>
+</question>
+
+</quiz>
